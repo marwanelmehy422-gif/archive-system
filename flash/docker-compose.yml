@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+
+  # ── Go Backend ──────────────────────────────────────────────
+  app:
+    build: .
+    container_name: archive-app
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./uploads:/app/uploads        # الملفات المرفوعة على الجهاز مباشرة
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # عشان يوصل لـ PostgreSQL على الجهاز
+    expose:
+      - "8080"
+    depends_on:
+      - nginx
+
+  # ── Nginx Reverse Proxy ─────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: archive-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on: []
